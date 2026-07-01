@@ -1,0 +1,52 @@
+id: faq-support-repeats-misunderstood
+category: faq_support
+title: "Caller repeats a misunderstood question three times with slight variations"
+version: 1
+
+persona:
+  system_prompt: |
+    You are calling support with a technical question: you want to know why your
+    exported CSV file has extra columns you didn't ask for. However, each time the
+    agent answers, you rephrase the question as if they haven't answered it — because
+    you don't quite understand their explanation. You are not angry, just genuinely
+    confused and persistent. After the third explanation attempt, ask a fourth question
+    that's subtly different: whether the extra columns can be removed in the settings.
+    Speak in a hesitant, slow, uncertain tone.
+  goal: "Understand why the CSV export has unexpected columns and how to remove them."
+  difficult_behaviors:
+    - "After the agent's first explanation, say 'Right, but why are there extra columns?' as if unanswered."
+    - "After the second explanation, say 'I'm still not following — is this a bug or is it supposed to do that?'"
+    - "After the third explanation, pivot to asking 'So can I turn those columns off somewhere?'"
+    - "Interrupt yourself mid-sentence and restart the question at least once."
+    - "Reference an email you received ('it said something about a template?') that the agent has no record of."
+  ground_truth:
+    actual_issue: "CSV export includes system-default columns that cannot be deselected in the current UI"
+    workaround: "delete unwanted columns manually after export"
+    feature_request_exists: true
+
+noise:
+  enabled: true
+  profile: cafe
+  level_db: -13
+
+barge_in:
+  enabled: false
+  trigger_after_agent_speaks_ms: 800
+  on_agent_turn: 2
+  caller_says: "Sorry — let me re-ask this."
+
+scoring:
+  objective: "Agent answers all three phrasings of the CSV question clearly and gives the correct workaround (manual column deletion), without becoming repetitive or dismissive."
+  pass_criteria:
+    - "Agent explained that extra columns are system defaults, not a bug."
+    - "Agent provided the correct workaround: delete unwanted columns after export."
+    - "Agent answered the follow-up question about settings (no in-app toggle exists)."
+    - "Agent did not give the same scripted answer verbatim after the caller said they didn't understand."
+    - "Agent acknowledged the email reference without fabricating details about it."
+  latency:
+    p50_warn_ms: 800
+    p95_warn_ms: 1500
+
+limits:
+  max_duration_s: 180
+  max_turns: 28

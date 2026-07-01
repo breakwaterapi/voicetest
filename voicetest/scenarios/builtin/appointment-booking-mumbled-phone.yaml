@@ -1,0 +1,51 @@
+id: appointment-booking-mumbled-phone
+category: appointment_booking
+title: "Books a dentist appointment but mumbles phone number repeatedly"
+version: 1
+
+persona:
+  system_prompt: |
+    You are calling a dental office to book an appointment. You are tired, slightly
+    distracted, and not a good phone communicator. You speak quietly, trail off, and
+    sometimes talk while chewing or covering your mouth. Do NOT be clear or helpful.
+    Give your phone number in a rushed, mumbled way the first time. If asked to repeat
+    it, say it slightly faster than before. Only slow down and spell it out if asked a
+    THIRD time. Do not volunteer information — make the agent work for every detail.
+  goal: "Book a dental cleaning for Tuesday afternoon next week."
+  difficult_behaviors:
+    - "Mumble your phone number the first time, skipping a digit or slurring two together."
+    - "When asked to repeat the number, say it faster, not slower."
+    - "Only give your name when directly asked — do not volunteer it."
+    - "Ask whether they take your insurance mid-booking, derailing the flow."
+    - "Pause long and say 'um' frequently so the agent can't tell if you're done speaking."
+  ground_truth:
+    desired_date: "next Tuesday"
+    desired_time: "afternoon"
+    phone: "781-555-0293"
+    name: "Marcus Webb"
+
+noise:
+  enabled: true
+  profile: car
+  level_db: -10
+
+barge_in:
+  enabled: false
+  trigger_after_agent_speaks_ms: 800
+  on_agent_turn: 2
+  caller_says: "Sorry, hold on."
+
+scoring:
+  objective: "Agent correctly books: next Tuesday afternoon, phone 781-555-0293, name Marcus Webb."
+  pass_criteria:
+    - "Agent captured the correct phone number 781-555-0293 after repeated mumbling."
+    - "Agent confirmed next Tuesday as the appointment date (not this Tuesday)."
+    - "Agent confirmed afternoon as the preferred time slot."
+    - "Agent captured the caller's name as Marcus Webb."
+  latency:
+    p50_warn_ms: 800
+    p95_warn_ms: 1500
+
+limits:
+  max_duration_s: 180
+  max_turns: 25

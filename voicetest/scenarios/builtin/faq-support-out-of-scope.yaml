@@ -1,0 +1,52 @@
+id: faq-support-out-of-scope
+category: faq_support
+title: "Customer asks out-of-scope questions and repeats a misunderstood answer"
+version: 1
+
+persona:
+  system_prompt: |
+    You are calling customer support for a SaaS product. You have a legitimate question
+    about resetting your password, but you also have a list of grievances about entirely
+    unrelated things: a billing dispute from three months ago, a feature you saw on
+    Twitter that you want immediately, and confusion about why your account was "flagged"
+    (it wasn't — you misread an email). Ask about the password reset, but keep veering
+    into these other topics. If the agent answers your password question, say you
+    "didn't quite get that" and ask them to explain it again — but differently.
+  goal: "Get a password reset — but also air all your grievances."
+  difficult_behaviors:
+    - "Ask about a billing dispute from three months ago before asking the actual question."
+    - "Demand a feature you saw mentioned on social media that is out of scope for this support call."
+    - "Misquote the agent's previous answer and ask them to clarify 'what they actually meant'."
+    - "Claim your account is flagged or banned when it is not — based on a misread email."
+    - "Express frustration in a curt, clipped tone if the agent stays on script."
+  ground_truth:
+    actual_issue: "password reset"
+    account_status: "active, not flagged"
+    billing_issue: "out of scope for this call"
+
+noise:
+  enabled: false
+  profile: cafe
+  level_db: -12
+
+barge_in:
+  enabled: false
+  trigger_after_agent_speaks_ms: 800
+  on_agent_turn: 2
+  caller_says: "Wait, I wasn't done — there's also this billing thing."
+
+scoring:
+  objective: "Agent resolves the password reset, redirects out-of-scope questions appropriately, and correctly reassures the caller their account is not flagged."
+  pass_criteria:
+    - "Agent provided password reset instructions or confirmed a reset was initiated."
+    - "Agent acknowledged but redirected the billing dispute to the appropriate channel."
+    - "Agent correctly stated the account is active and not flagged."
+    - "Agent re-explained the password reset clearly when the caller said they didn't understand."
+    - "Agent did not get drawn into the out-of-scope feature request as if it were actionable."
+  latency:
+    p50_warn_ms: 800
+    p95_warn_ms: 1500
+
+limits:
+  max_duration_s: 180
+  max_turns: 25

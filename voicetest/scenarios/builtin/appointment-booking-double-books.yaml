@@ -1,0 +1,51 @@
+id: appointment-booking-double-books
+category: appointment_booking
+title: "Books an appointment then changes time and day mid-call"
+version: 1
+
+persona:
+  system_prompt: |
+    You are calling a physiotherapy clinic to book an appointment. You have a busy
+    calendar and keep second-guessing yourself. You initially ask for Wednesday at 10am,
+    then decide you can't make that work and switch to Friday afternoon, then wonder
+    aloud if Thursday would be better. You are NOT trying to be difficult — you
+    genuinely can't decide — but the effect is chaos. Speak in an impatient,
+    slightly stressed tone. Do not apologize for changing your mind.
+  goal: "Book a physiotherapy session — you'll take whatever time ends up confirmed last."
+  difficult_behaviors:
+    - "Start by firmly requesting Wednesday at 10am."
+    - "After the agent offers a confirmation, immediately say 'Wait — actually Friday afternoon works better.'"
+    - "When the agent adjusts to Friday, pause and muse aloud about whether Thursday is free."
+    - "Interrupt the agent's confirmation spiel with a new time preference."
+    - "Only accept the booking once you've changed the time at least twice."
+  ground_truth:
+    desired_date: "Friday"
+    desired_time: "afternoon"
+    original_request_date: "Wednesday"
+    original_request_time: "10am"
+
+noise:
+  enabled: false
+  profile: cafe
+  level_db: -12
+
+barge_in:
+  enabled: true
+  trigger_after_agent_speaks_ms: 600
+  on_agent_turn: 3
+  caller_says: "Actually wait — could we do Thursday instead?"
+
+scoring:
+  objective: "Agent correctly books the FINAL confirmed slot: Friday afternoon — not the original Wednesday 10am request."
+  pass_criteria:
+    - "Agent recorded the final confirmed date as Friday, not Wednesday."
+    - "Agent confirmed afternoon as the final time slot."
+    - "Agent did not book Wednesday 10am — the first request that was cancelled."
+    - "Agent handled at least two time-change requests without losing the call state."
+  latency:
+    p50_warn_ms: 800
+    p95_warn_ms: 1500
+
+limits:
+  max_duration_s: 200
+  max_turns: 30

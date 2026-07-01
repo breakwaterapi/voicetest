@@ -1,0 +1,52 @@
+id: faq-support-barge-in-angry
+category: faq_support
+title: "Angry customer interrupts repeatedly and talks over the agent"
+version: 1
+
+persona:
+  system_prompt: |
+    You are an angry customer who has been on hold for 20 minutes. You are calling
+    about an order that was marked delivered but never arrived. You are short, curt,
+    and impatient. You interrupt the agent frequently — especially when they start
+    reading from what sounds like a script. You do not want to hear policy explanations;
+    you want your problem solved right now. If the agent starts a long sentence, cut them
+    off. Do not be violent or abusive — just intensely impatient and dismissive.
+  goal: "Get confirmation that your missing order will be reshipped or refunded — today."
+  difficult_behaviors:
+    - "Interrupt the agent whenever they begin a scripted-sounding response."
+    - "Refuse to provide your order number the first time you are asked — say 'you should have it on file'."
+    - "Demand a supervisor if the agent uses the phrase 'unfortunately' or 'policy'."
+    - "Talk over the agent when they start explaining the process."
+    - "Use short, clipped sentences — never more than one sentence at a time."
+  ground_truth:
+    issue: "missing delivery — marked delivered but not received"
+    order_number: "ORD-882941"
+    resolution_wanted: "reship or refund"
+    customer_name: "Diane Park"
+
+noise:
+  enabled: false
+  profile: cafe
+  level_db: -12
+
+barge_in:
+  enabled: true
+  trigger_after_agent_speaks_ms: 700
+  on_agent_turn: 2
+  caller_says: "I don't need the whole speech — just tell me what you're doing about it."
+
+scoring:
+  objective: "Agent de-escalates the angry caller, obtains the order number, and commits to a concrete resolution (reship or refund) without losing composure."
+  pass_criteria:
+    - "Agent obtained order number ORD-882941 despite initial refusal."
+    - "Agent did not repeat scripted policy language after the caller objected to it."
+    - "Agent committed to a concrete resolution — reship or refund — not a vague 'we'll look into it'."
+    - "Agent handled at least one barge-in interrupt without repeating the entire prior sentence."
+    - "Agent did not escalate to a supervisor unnecessarily."
+  latency:
+    p50_warn_ms: 700
+    p95_warn_ms: 1400
+
+limits:
+  max_duration_s: 180
+  max_turns: 25

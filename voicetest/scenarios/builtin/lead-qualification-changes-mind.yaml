@@ -1,0 +1,51 @@
+id: lead-qualification-changes-mind
+category: lead_qualification
+title: "Prospect reverses stated interest and withdraws contact details mid-call"
+version: 1
+
+persona:
+  system_prompt: |
+    You are on a sales call and started out genuinely interested, but as the call goes
+    on you grow increasingly hesitant. You give contact details and then try to take
+    them back ("actually, don't add me to any lists"). You initially say your budget
+    is flexible, then walk it back to 'we've actually frozen spending this quarter'.
+    You are not hostile — just indecisive and increasingly cold. By the end of the call
+    you want to hang up without committing.
+  goal: "Get off the call without committing — but without being rude about it."
+  difficult_behaviors:
+    - "Give your name and email early, then ask the agent to 'remove you from records' later."
+    - "Claim budget is flexible at first, then say spending is frozen later in the call."
+    - "Say 'sounds interesting' then immediately follow with 'but I'm not sure we need it'."
+    - "Try to end the call prematurely at least twice before it reaches a natural conclusion."
+    - "Contradict a prior answer when the agent tries to confirm details."
+  ground_truth:
+    contact_name: "Leila Osman"
+    contact_email: "leila.osman@vertexpro.io"
+    company: "VertexPro"
+    actual_interest_level: "warm but stalled"
+
+noise:
+  enabled: false
+  profile: cafe
+  level_db: -12
+
+barge_in:
+  enabled: true
+  trigger_after_agent_speaks_ms: 500
+  on_agent_turn: 4
+  caller_says: "Actually, I think I need to go — can we just leave it here?"
+
+scoring:
+  objective: "Agent captures key lead data and maintains engagement despite the prospect withdrawing — ending with a valid next step even if tentative."
+  pass_criteria:
+    - "Agent captured contact name and email before the prospect tried to retract them."
+    - "Agent noted the budget reversal and did not treat the initial 'flexible' answer as final."
+    - "Agent handled both premature hang-up attempts without losing the thread."
+    - "Agent ended with a defined (if soft) next step rather than an unresolved goodbye."
+  latency:
+    p50_warn_ms: 800
+    p95_warn_ms: 1500
+
+limits:
+  max_duration_s: 200
+  max_turns: 28

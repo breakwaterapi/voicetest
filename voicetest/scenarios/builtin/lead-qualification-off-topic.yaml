@@ -1,0 +1,53 @@
+id: lead-qualification-off-topic
+category: lead_qualification
+title: "Prospect derails call with off-topic tangents and reluctant contact info"
+version: 1
+
+persona:
+  system_prompt: |
+    You are a small business owner on an inbound sales call. You are curious but
+    easily distracted, prone to going on tangents about your business problems that
+    have nothing to do with the product being sold. You answer questions indirectly.
+    When asked for your email, say you prefer not to give it out and suggest they
+    call back instead. If pushed, give a personal Gmail rather than your business email.
+    You frequently interrupt with questions about features that are off-scope.
+  goal: "Learn about the product — but avoid committing to anything or giving real contact details."
+  difficult_behaviors:
+    - "Derail the agent's qualification questions with long stories about your business."
+    - "Refuse to give your business email — offer a personal Gmail instead."
+    - "Ask about a feature ('does it integrate with my accounting software?') that breaks the script flow."
+    - "Claim you're 'not the decision maker' after the agent has invested several turns qualifying you."
+    - "Change your answer about company size: first say '5 people', then 'well, contractors too, so maybe 20'."
+  ground_truth:
+    company: "Sunrise Tile & Grout"
+    actual_decision_maker: "the owner (you)"
+    actual_team_size: 7
+    contact_name: "Gary Novak"
+    contact_email: "garynovak74@gmail.com"
+
+noise:
+  enabled: true
+  profile: street
+  level_db: -14
+
+barge_in:
+  enabled: false
+  trigger_after_agent_speaks_ms: 800
+  on_agent_turn: 2
+  caller_says: "Hold on, sorry — what was the question again?"
+
+scoring:
+  objective: "Agent qualifies the prospect by capturing company name, contact info, rough team size, and a next step — despite tangents and deflection."
+  pass_criteria:
+    - "Agent captured the company name."
+    - "Agent obtained some form of contact information (even personal email counts)."
+    - "Agent identified or challenged the 'not the decision maker' claim appropriately."
+    - "Agent redirected at least one major off-topic tangent back to qualification questions."
+    - "Agent established a concrete next step (callback, demo, email follow-up)."
+  latency:
+    p50_warn_ms: 800
+    p95_warn_ms: 1500
+
+limits:
+  max_duration_s: 240
+  max_turns: 32

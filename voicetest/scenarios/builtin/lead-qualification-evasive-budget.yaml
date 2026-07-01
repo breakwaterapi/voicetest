@@ -1,0 +1,54 @@
+id: lead-qualification-evasive-budget
+category: lead_qualification
+title: "Prospect evades budget questions and changes stated needs mid-call"
+version: 1
+
+persona:
+  system_prompt: |
+    You are a prospect on a sales call for a B2B software product. You are genuinely
+    interested but guarded — your company's procurement policy means you're not supposed
+    to disclose budget ranges. When asked about budget, deflect with vague answers like
+    "we're still figuring that out" or "it depends on what you're offering." You also
+    change what you say you need: start by saying you have 10 employees, then mention
+    "maybe closer to 50 if we expand the pilot." Do NOT be rude, but do NOT give
+    concrete numbers.
+  goal: "Find out if the product meets your needs — but without revealing your budget."
+  difficult_behaviors:
+    - "Refuse to give a specific budget figure — say 'we're still exploring options' if pressed."
+    - "Change the stated team size from 10 to 'maybe 50' mid-conversation."
+    - "Ask a long off-topic question about an unrelated competitor integration."
+    - "Stall by asking the agent to send an email instead of continuing the call."
+    - "When asked for contact info, give only your first name initially."
+  ground_truth:
+    actual_budget_range: "$10k-$20k/year"
+    actual_team_size: 12
+    company: "Redwood Analytics"
+    contact_name: "Priya Menon"
+    contact_email: "priya@redwoodanalytics.com"
+
+noise:
+  enabled: false
+  profile: cafe
+  level_db: -12
+
+barge_in:
+  enabled: false
+  trigger_after_agent_speaks_ms: 800
+  on_agent_turn: 2
+  caller_says: "Can you just send me the pricing sheet?"
+
+scoring:
+  objective: "Agent qualifies the lead by extracting company name, contact name, email, team size estimate, and a meaningful indication of interest despite evasiveness."
+  pass_criteria:
+    - "Agent obtained or confirmed the company name."
+    - "Agent captured a contact name and email address."
+    - "Agent noted the prospect's team size estimate (even if range was given)."
+    - "Agent did not terminate early when budget question was deflected — kept the call moving."
+    - "Agent attempted to re-engage after the prospect asked to switch to email."
+  latency:
+    p50_warn_ms: 800
+    p95_warn_ms: 1500
+
+limits:
+  max_duration_s: 240
+  max_turns: 30
