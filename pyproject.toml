@@ -15,9 +15,9 @@ dependencies = [
     "pyyaml>=6.0",
     "twilio>=9.0",
     # Pinned to the SDK generation the provider code targets:
-    #   cartesia v1.x  → client.tts.sse(voice_id=…), event.data
+    #   cartesia v4.x  → client.tts.generate_sse(voice={...}), base64 event.data
     #   deepgram v3.x  → from deepgram import LiveOptions; client.listen.asynclive.v("1")
-    "cartesia>=1.0,<2",
+    "cartesia[websockets]>=4.2,<5",
     "deepgram-sdk>=3.0,<4",
     "anthropic>=0.40",
     "openai>=1.0",

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 from collections.abc import AsyncIterator
 from typing import Protocol, runtime_checkable
 
@@ -40,24 +41,24 @@ class CartesiaTTS:
         except ImportError as e:
             raise RuntimeError("cartesia not installed — pip install cartesia") from e
 
-        # cartesia v1.x: tts.sse(...) is a coroutine returning an async generator
-        # of dict chunks ({"audio": <pcm bytes>, ...}) — NOT an async context
-        # manager yielding objects with `.data` (that was a pre-1.0 shape).
+        # cartesia v4.x: tts.generate_sse(...) is a coroutine returning an async
+        # stream of typed events; "chunk" events carry base64-encoded audio in `.data`.
         client = AsyncCartesia(api_key=self._api_key)
         try:
-            generator = await client.tts.sse(
+            generator = await client.tts.generate_sse(
                 transcript=text,
-                voice_id=self._voice_id,
+                voice={"mode": "id", "id": self._voice_id},
                 model_id=self._model_id,
                 output_format={
                     "container": "raw",
                     "encoding": "pcm_s16le",
                     "sample_rate": SAMPLE_RATE,
                 },
-                stream=True,
             )
             async for chunk in generator:
-                audio = chunk["audio"] if isinstance(chunk, dict) else getattr(chunk, "audio", None)
+                if getattr(chunk, "type", None) != "chunk":
+                    continue
+                audio = base64.b64decode(chunk.data)
                 if audio:
                     yield AudioFrame(samples=audio, sample_rate=SAMPLE_RATE)
         finally:
